@@ -207,6 +207,13 @@
       controls.verticalMax = 2.2;
 
       stats = new Stats();
+      
+      // Reseteamos el top y lo mandamos abajo, justo arriba del footer
+      stats.dom.style.top = 'auto';
+      stats.dom.style.bottom = '45px'; // 40px del footer + 5px de margen
+      stats.dom.style.left = '10px';   // Un pequeño margen a la izquierda para que se vea limpio
+      
+      container.appendChild(stats.dom);
       container.appendChild(stats.dom);
 
       window.addEventListener('resize', onWindowResize);
