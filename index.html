@@ -1,53 +1,260 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demos Three.js</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demos Three.js</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="./css/styles.css">
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Three.js Demos</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="minecraft.html">Minecraft</a></li>
-                    <li class="nav-item"><a class="nav-link" href="map.html">Map Controls</a></li>
-                    <li class="nav-item"><a class="nav-link" href="orbit.html">Orbit Controls</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pointerlock.html">PointerLock</a></li>
-                </ul>
+  <nav class="navbar navbar-expand-lg navbar-dark custom-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">Three.js Demos</a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto gap-lg-2">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://threejs.org/" target="_blank" rel="noopener">
+              Three.js
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://threejs.org/docs/" target="_blank" rel="noopener">
+              Documentación
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/mrdoob/three.js/" target="_blank" rel="noopener">
+              GitHub
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-grow-1">
+    <section class="hero-section">
+      <div class="container">
+        <div class="row align-items-center g-5">
+          <div class="col-lg-6">
+            <div class="hero-badge">Proyecto Visual Interactivo</div>
+
+            <h1 class="hero-title">
+              Explora demos de <span>Three.js</span> con una interfaz moderna
+            </h1>
+
+            <p class="hero-text">
+              Visualiza escenas 3D con distintos tipos de controles:
+              terreno estilo Minecraft, navegación tipo mapa, rotación orbital
+              y desplazamiento en primera persona.
+            </p>
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+              <a href="#demos" class="uiverse-btn">
+                <span class="uiverse-btn__inner">Explorar Demos</span>
+              </a>
+
+              <a href="https://threejs.org/examples/" target="_blank" rel="noopener" class="glass-btn">
+                Ver ejemplos oficiales
+              </a>
             </div>
-        </div>
-    </nav>
+          </div>
 
-    <main class="container flex-grow-1 d-flex flex-column justify-content-center align-items-center mt-5">
-        <h1 class="mb-4">Selecciona una Demo</h1>
-        
-        <a href="minecraft.html" style="text-decoration: none;">
-            <button class="button">
-                <div class="button-outer">
-                    <div class="button-inner">
-                        <span>Explorar Demos</span>
-                    </div>
+          <div class="col-lg-6">
+            <div class="hero-panel">
+              <div class="panel-glow"></div>
+
+              <div class="panel-content">
+                <div class="mini-card">
+                  <span class="mini-dot dot-blue"></span>
+                  <div>
+                    <h5>Minecraft Demo</h5>
+                    <p>Terreno procedural y vista en primera persona.</p>
+                  </div>
                 </div>
-            </button>
-        </a>
 
-    </main>
+                <div class="mini-card">
+                  <span class="mini-dot dot-red"></span>
+                  <div>
+                    <h5>Map Controls</h5>
+                    <p>Paneo, zoom y navegación aérea fluida.</p>
+                  </div>
+                </div>
 
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
-        <div class="container">
-            <p class="mb-0">Desarrollado por Luis Enrique Cabrera García</p>
-            <small>Estudiante de ITICS | Instituto Tecnológico de Pachuca</small>
+                <div class="mini-card">
+                  <span class="mini-dot dot-purple"></span>
+                  <div>
+                    <h5>Orbit Controls</h5>
+                    <p>Inspección de escena con rotación alrededor del objeto.</p>
+                  </div>
+                </div>
+
+                <div class="mini-card">
+                  <span class="mini-dot dot-cyan"></span>
+                  <div>
+                    <h5>Pointer Lock</h5>
+                    <p>Movimiento FPS con WASD, mouse y salto.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <section id="demos" class="demo-section">
+          <div class="section-header text-center mb-5">
+            <h2 class="section-title">Selecciona una Demo</h2>
+            <p class="section-subtitle">
+              Cada demo muestra una forma diferente de interacción en Three.js
+            </p>
+          </div>
+
+          <div class="row g-4">
+
+            <div class="col-md-6 col-xl-3">
+              <div class="demo-card demo-hover">
+                <span class="badge-tech">Three.js</span>
+
+                <div class="preview">
+                  <iframe src="minecraft.html" loading="lazy" title="Preview Minecraft"></iframe>
+                </div>
+
+                <div class="demo-card__icon">🟩</div>
+                <h3>Minecraft</h3>
+                <p>
+                  Mundo voxel con terreno procedural y exploración en primera persona.
+                </p>
+
+                <div class="demo-actions">
+                  <a href="minecraft.html" class="demo-link">Abrir demo</a>
+                  <a
+                    href="https://threejs.org/examples/#webgl_geometry_minecraft"
+                    target="_blank"
+                    rel="noopener"
+                    class="demo-source"
+                  >
+                    Original
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+              <div class="demo-card demo-hover">
+                <span class="badge-tech">Three.js</span>
+
+                <div class="preview">
+                  <iframe src="map.html" loading="lazy" title="Preview Map Controls"></iframe>
+                </div>
+
+                <div class="demo-card__icon">🗺️</div>
+                <h3>Map Controls</h3>
+                <p>
+                  Cámara estilo mapa con desplazamiento lateral, zoom y control suave de escena.
+                </p>
+
+                <div class="demo-actions">
+                  <a href="map.html" class="demo-link">Abrir demo</a>
+                  <a
+                    href="https://threejs.org/examples/#misc_controls_map"
+                    target="_blank"
+                    rel="noopener"
+                    class="demo-source"
+                  >
+                    Original
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+              <div class="demo-card demo-hover">
+                <span class="badge-tech">Three.js</span>
+
+                <div class="preview">
+                  <iframe src="orbit.html" loading="lazy" title="Preview Orbit Controls"></iframe>
+                </div>
+
+                <div class="demo-card__icon">🪐</div>
+                <h3>Orbit Controls</h3>
+                <p>
+                  Rotación orbital para observar la escena desde diferentes ángulos alrededor del objeto.
+                </p>
+
+                <div class="demo-actions">
+                  <a href="orbit.html" class="demo-link">Abrir demo</a>
+                  <a
+                    href="https://threejs.org/examples/#misc_controls_orbit"
+                    target="_blank"
+                    rel="noopener"
+                    class="demo-source"
+                  >
+                    Original
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+              <div class="demo-card demo-hover">
+                <span class="badge-tech">Three.js</span>
+
+                <div class="preview">
+                  <iframe src="pointerlock.html" loading="lazy" title="Preview Pointer Lock"></iframe>
+                </div>
+
+                <div class="demo-card__icon">🎮</div>
+                <h3>Pointer Lock</h3>
+                <p>
+                  Experiencia tipo videojuego con WASD, mouse y salto para interactuar con la escena.
+                </p>
+
+                <div class="demo-actions">
+                  <a href="pointerlock.html" class="demo-link">Abrir demo</a>
+                  <a
+                    href="https://threejs.org/examples/#misc_controls_pointerlock"
+                    target="_blank"
+                    rel="noopener"
+                    class="demo-source"
+                  >
+                    Original
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="custom-footer text-center py-4 mt-auto">
+    <div class="container">
+      <p class="mb-1 fw-semibold">Desarrollado por Luis Enrique Cabrera García</p>
+      <small>Estudiante de ITICS | Instituto Tecnológico de Pachuca</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

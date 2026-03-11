@@ -44,7 +44,7 @@
     #instructions .hint {
       font-size: 15px;
       line-height: 1.7;
-      opacity: 0.95;
+      opacity: 0.96;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.18);
       padding: 14px 18px;
@@ -112,10 +112,10 @@
       camera.position.y = 10;
 
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xdbe4ee);
-      scene.fog = new THREE.Fog(0xdbe4ee, 0, 750);
+      scene.background = new THREE.Color(0xd6e0ee);
+      scene.fog = new THREE.Fog(0xd6e0ee, 0, 550);
 
-      const light = new THREE.HemisphereLight(0xf4f7ff, 0x65728a, 2.6);
+      const light = new THREE.HemisphereLight(0xffffff, 0x445577, 1.8);
       light.position.set(0.5, 1, 0.75);
       scene.add(light);
 
@@ -141,6 +141,7 @@
       scene.add(controls.object);
 
       const onKeyDown = function (event) {
+
         switch (event.code) {
           case 'ArrowUp':
           case 'KeyW':
@@ -167,9 +168,11 @@
             canJump = false;
             break;
         }
+
       };
 
       const onKeyUp = function (event) {
+
         switch (event.code) {
           case 'ArrowUp':
           case 'KeyW':
@@ -191,6 +194,7 @@
             moveRight = false;
             break;
         }
+
       };
 
       document.addEventListener('keydown', onKeyDown);
@@ -203,6 +207,7 @@
         10
       );
 
+      // FLOOR
       let floorGeometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
       floorGeometry.rotateX(-Math.PI / 2);
 
@@ -225,9 +230,9 @@
 
       for (let i = 0, l = position.count; i < l; i++) {
         color.setHSL(
-          Math.random() * 0.08 + 0.55,
-          0.35,
-          Math.random() * 0.12 + 0.68,
+          Math.random() * 0.08 + 0.58,
+          0.55,
+          Math.random() * 0.15 + 0.45,
           THREE.SRGBColorSpace
         );
         colorsFloor.push(color.r, color.g, color.b);
@@ -242,6 +247,7 @@
       const floor = new THREE.Mesh(floorGeometry, floorMaterial);
       scene.add(floor);
 
+      // BOXES
       const boxGeometry = new THREE.BoxGeometry(20, 20, 20).toNonIndexed();
 
       position = boxGeometry.attributes.position;
@@ -249,9 +255,9 @@
 
       for (let i = 0, l = position.count; i < l; i++) {
         color.setHSL(
-          Math.random() * 0.06 + 0.58,
-          0.42,
-          Math.random() * 0.18 + 0.52,
+          Math.random() * 0.05 + 0.60,
+          0.65,
+          Math.random() * 0.25 + 0.35,
           THREE.SRGBColorSpace
         );
         colorsBox.push(color.r, color.g, color.b);
@@ -270,9 +276,9 @@
         });
 
         boxMaterial.color.setHSL(
-          Math.random() * 0.06 + 0.58,
-          0.45,
-          Math.random() * 0.18 + 0.48,
+          Math.random() * 0.05 + 0.60,
+          0.65,
+          Math.random() * 0.25 + 0.35,
           THREE.SRGBColorSpace
         );
 
