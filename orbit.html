@@ -7,22 +7,19 @@
 
   <link rel="stylesheet" href="./assets/css/main.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
+  <style>
+    /* Estilo para indicar que se puede interactuar */
+    canvas {
+      cursor: crosshair;
+    }
+  </style>
 </head>
 
 <body>
-  <nav class="custom-navbar">
-    <div class="nav-brand">Three.js Demos</div>
-    
-    <div class="nav-links">
-      <a href="index.html">Inicio</a>
-      <a href="https://threejs.org" target="_blank" rel="noopener">Three.js</a>
-      <a href="https://threejs.org/docs/" target="_blank" rel="noopener">Documentación</a>
-      <a href="https://github.com/mrdoob/three.js/" target="_blank" rel="noopener">GitHub Repositorio Oficial</a>
-    </div>
-  </nav>
   <div id="info">
     <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>
-    · Orbit Controls Demo
+    · Orbit Controls Demo<br>
+    <strong>Haz doble clic</strong> sobre cualquier cono para enfocar la cámara en él.
   </div>
 
   <script type="importmap">
@@ -39,6 +36,15 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     let camera, controls, scene, renderer;
+    let mesh;
+    let raycaster, mouse;
+    
+    // Variables para el enfoque dinámico (Punto 4)
+    let targetFocus = new THREE.Vector3(0, 0, 0);
+    let isFocusing = false;
+    
+    // Objeto auxiliar para calcular las posiciones y animaciones (Punto 3)
+    const dummy = new THREE.Object3D();
 
     init();
 
@@ -50,40 +56,54 @@
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
+      
+      // 2. HABILITAMOS LAS SOMBRAS EN EL RENDERER
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      
       renderer.setAnimationLoop(animate);
       document.body.appendChild(renderer.domElement);
 
-      camera = new THREE.PerspectiveCamera(
-        60,
-        window.innerWidth / window.innerHeight,
-        1,
-        1000
-      );
-      camera.position.set(400, 200, 0);
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+      camera.position.set(400, 200, 400);
 
       controls = new OrbitControls(camera, renderer.domElement);
       controls.listenToKeyEvents(window);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.screenSpacePanning = false;
-      controls.minDistance = 100;
-      controls.maxDistance = 500;
-      controls.cursorStyle = 'grab';
+      controls.minDistance = 50;
+      controls.maxDistance = 800;
       controls.maxPolarAngle = Math.PI / 2;
 
+      // 2. CREACIÓN DEL SUELO QUE RECIBE SOMBRAS
+      const planeGeometry = new THREE.PlaneGeometry(3000, 3000);
+      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0xc1cddb, depthWrite: false });
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.y = -40; // Colocamos el suelo un poco por debajo de los conos
+      plane.receiveShadow = true;
+      scene.add(plane);
+
+      // CREACIÓN DE LOS CONOS
       const geometry = new THREE.ConeGeometry(10, 30, 4, 1);
       const material = new THREE.MeshPhongMaterial({
         color: 0x7c86b6,
         flatShading: true
       });
 
-      const mesh = new THREE.InstancedMesh(geometry, material, 500);
-      const dummy = new THREE.Object3D();
+      mesh = new THREE.InstancedMesh(geometry, material, 500);
+      
+      // 2. LOS CONOS PROYECTAN Y RECIBEN SOMBRAS
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
 
       for (let i = 0; i < 500; i++) {
         dummy.position.x = Math.random() * 1600 - 800;
-        dummy.position.y = 0;
+        dummy.position.y = Math.random() * 20; // Variación inicial en Y
         dummy.position.z = Math.random() * 1600 - 800;
+
+        dummy.rotation.y = Math.random() * Math.PI;
 
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
@@ -91,18 +111,58 @@
 
       scene.add(mesh);
 
+      // LUCES Y SOMBRAS
       const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.5);
-      dirLight1.position.set(1, 1, 1);
+      dirLight1.position.set(200, 300, 200);
+      
+      // 2. LA LUZ PRINCIPAL PROYECTA SOMBRA
+      dirLight1.castShadow = true;
+      dirLight1.shadow.camera.top = 800;
+      dirLight1.shadow.camera.bottom = -800;
+      dirLight1.shadow.camera.left = -800;
+      dirLight1.shadow.camera.right = 800;
+      dirLight1.shadow.camera.near = 0.1;
+      dirLight1.shadow.camera.far = 1500;
+      dirLight1.shadow.mapSize.width = 2048;
+      dirLight1.shadow.mapSize.height = 2048;
       scene.add(dirLight1);
 
-      const dirLight2 = new THREE.DirectionalLight(0x4455aa, 2);
-      dirLight2.position.set(-1, -1, -1);
+      const dirLight2 = new THREE.DirectionalLight(0x4455aa, 1.5);
+      dirLight2.position.set(-100, 100, -100);
       scene.add(dirLight2);
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
       scene.add(ambientLight);
 
+      // 4. PREPARACIÓN DEL RAYCASTER PARA EL DOBLE CLIC
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
       window.addEventListener('resize', onWindowResize);
+      window.addEventListener('dblclick', onDoubleClick);
+    }
+
+    // 4. FUNCIÓN DE ENFOQUE DINÁMICO AL HACER DOBLE CLIC
+    function onDoubleClick(event) {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(mesh);
+
+      if (intersects.length > 0) {
+        const instanceId = intersects[0].instanceId;
+        
+        // Extraemos la matriz de esa instancia específica
+        const matrix = new THREE.Matrix4();
+        mesh.getMatrixAt(instanceId, matrix);
+        
+        // Obtenemos su posición exacta en el mundo
+        targetFocus.setFromMatrixPosition(matrix);
+        
+        // Activamos la bandera para que el ciclo animate() inicie la transición
+        isFocusing = true;
+      }
     }
 
     function onWindowResize() {
@@ -112,6 +172,39 @@
     }
 
     function animate() {
+      // 3. ANIMACIÓN DE LAS INSTANCIAS (Rotación y Flotación)
+      const time = performance.now() * 0.001;
+      
+      for (let i = 0; i < 500; i++) {
+        mesh.getMatrixAt(i, dummy.matrix);
+        
+        // Descomponemos la matriz actual para leer su posición y rotación
+        dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+        
+        // Hacemos que gire sobre sí mismo continuamente
+        dummy.rotation.y += 0.01;
+        
+        // Hacemos que flote arriba y abajo usando una onda senoidal. 
+        // Usamos el índice 'i' para que cada uno flote a destiempo.
+        dummy.position.y = Math.sin(time * 2 + i) * 15;
+        
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+      }
+      // Le indicamos a Three.js que las matrices han cambiado y debe renderizarlas
+      mesh.instanceMatrix.needsUpdate = true;
+
+      // 4. TRANSICIÓN SUAVE DEL ENFOQUE (Lerp)
+      if (isFocusing) {
+        // Movemos el centro de rotación (target) hacia el cono seleccionado
+        controls.target.lerp(targetFocus, 0.05);
+        
+        // Si ya está muy cerca del objetivo, detenemos la transición
+        if (controls.target.distanceTo(targetFocus) < 0.5) {
+          isFocusing = false;
+        }
+      }
+
       controls.update();
       render();
     }
@@ -120,8 +213,5 @@
       renderer.render(scene, camera);
     }
   </script>
-  <footer class="custom-footer">
-    &copy; 2026 Luis Enrique Cabrera García - Proyectos Three.js
-  </footer>
 </body>
 </html>
