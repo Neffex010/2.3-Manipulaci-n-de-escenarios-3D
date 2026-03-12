@@ -12,16 +12,33 @@
     canvas {
       cursor: crosshair;
     }
+    /* Bajamos el panel de info para que no lo tape el Navbar */
+    #info {
+      top: 75px !important;
+    }
   </style>
 </head>
 
 <body>
+
+  <nav class="custom-navbar">
+    <div class="nav-brand">Three.js Demos</div>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="https://threejs.org" target="_blank" rel="noopener">Three.js</a>
+      <a href="https://threejs.org/docs/" target="_blank" rel="noopener">Documentación</a>
+      <a href="https://github.com/mrdoob/three.js/" target="_blank" rel="noopener">GitHub Repositorio Oficial</a>
+    </div>
+  </nav>
   <div id="info">
     <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>
     · Orbit Controls Demo<br>
     <strong>Haz doble clic</strong> sobre cualquier cono para enfocar la cámara en él.
   </div>
 
+  <footer class="custom-footer">
+    &copy; 2026 Proyectos Three.js - Todos los derechos reservados
+  </footer>
   <script type="importmap">
   {
     "imports": {
@@ -39,11 +56,11 @@
     let mesh;
     let raycaster, mouse;
     
-    // Variables para el enfoque dinámico (Punto 4)
+    // Variables para el enfoque dinámico
     let targetFocus = new THREE.Vector3(0, 0, 0);
     let isFocusing = false;
     
-    // Objeto auxiliar para calcular las posiciones y animaciones (Punto 3)
+    // Objeto auxiliar para calcular las posiciones y animaciones
     const dummy = new THREE.Object3D();
 
     init();
@@ -57,7 +74,7 @@
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       
-      // 2. HABILITAMOS LAS SOMBRAS EN EL RENDERER
+      // HABILITAMOS LAS SOMBRAS EN EL RENDERER
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       
@@ -76,7 +93,7 @@
       controls.maxDistance = 800;
       controls.maxPolarAngle = Math.PI / 2;
 
-      // 2. CREACIÓN DEL SUELO QUE RECIBE SOMBRAS
+      // CREACIÓN DEL SUELO QUE RECIBE SOMBRAS
       const planeGeometry = new THREE.PlaneGeometry(3000, 3000);
       const planeMaterial = new THREE.MeshPhongMaterial({ color: 0xc1cddb, depthWrite: false });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -94,7 +111,7 @@
 
       mesh = new THREE.InstancedMesh(geometry, material, 500);
       
-      // 2. LOS CONOS PROYECTAN Y RECIBEN SOMBRAS
+      // LOS CONOS PROYECTAN Y RECIBEN SOMBRAS
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
@@ -115,7 +132,7 @@
       const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.5);
       dirLight1.position.set(200, 300, 200);
       
-      // 2. LA LUZ PRINCIPAL PROYECTA SOMBRA
+      // LA LUZ PRINCIPAL PROYECTA SOMBRA
       dirLight1.castShadow = true;
       dirLight1.shadow.camera.top = 800;
       dirLight1.shadow.camera.bottom = -800;
@@ -134,7 +151,7 @@
       const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
       scene.add(ambientLight);
 
-      // 4. PREPARACIÓN DEL RAYCASTER PARA EL DOBLE CLIC
+      // PREPARACIÓN DEL RAYCASTER PARA EL DOBLE CLIC
       raycaster = new THREE.Raycaster();
       mouse = new THREE.Vector2();
 
@@ -142,7 +159,7 @@
       window.addEventListener('dblclick', onDoubleClick);
     }
 
-    // 4. FUNCIÓN DE ENFOQUE DINÁMICO AL HACER DOBLE CLIC
+    // FUNCIÓN DE ENFOQUE DINÁMICO AL HACER DOBLE CLIC
     function onDoubleClick(event) {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -172,7 +189,7 @@
     }
 
     function animate() {
-      // 3. ANIMACIÓN DE LAS INSTANCIAS (Rotación y Flotación)
+      // ANIMACIÓN DE LAS INSTANCIAS (Rotación y Flotación)
       const time = performance.now() * 0.001;
       
       for (let i = 0; i < 500; i++) {
@@ -194,7 +211,7 @@
       // Le indicamos a Three.js que las matrices han cambiado y debe renderizarlas
       mesh.instanceMatrix.needsUpdate = true;
 
-      // 4. TRANSICIÓN SUAVE DEL ENFOQUE (Lerp)
+      // TRANSICIÓN SUAVE DEL ENFOQUE (Lerp)
       if (isFocusing) {
         // Movemos el centro de rotación (target) hacia el cono seleccionado
         controls.target.lerp(targetFocus, 0.05);

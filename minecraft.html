@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
   <link rel="stylesheet" href="./assets/css/main.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧊</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧊</text></svg>">
 
   <style>
     body {
@@ -22,7 +22,7 @@
 
     #info {
       position: absolute;
-      top: 10px;
+      top: 75px; /* Ajustado para el Navbar */
       width: 100%;
       text-align: center;
       z-index: 100;
@@ -34,9 +34,9 @@
   </style>
 </head>
 <body>
-    <nav class="custom-navbar">
+
+  <nav class="custom-navbar">
     <div class="nav-brand">Three.js Demos</div>
-    
     <div class="nav-links">
       <a href="index.html">Inicio</a>
       <a href="https://threejs.org" target="_blank" rel="noopener">Three.js</a>
@@ -44,16 +44,18 @@
       <a href="https://github.com/mrdoob/three.js/" target="_blank" rel="noopener">GitHub Repositorio Oficial</a>
     </div>
   </nav>
-
   <div id="container"></div>
 
   <div id="info">
     <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
     <a href="https://minecraft.net" target="_blank" rel="noopener">minecraft</a> demo
     <br>
-    (left click: forward, right click: backward)
+    (clic izquierdo: avanzar, clic derecho: retroceder)
   </div>
 
+  <footer class="custom-footer">
+    &copy; 2026 Proyectos Three.js - Todos los derechos reservados
+  </footer>
   <script type="importmap">
   {
     "imports": {
@@ -88,50 +90,53 @@
 
       container = document.getElementById('container');
 
-      camera = new THREE.PerspectiveCamera(
-        60,
-        window.innerWidth / window.innerHeight,
-        1,
-        20000
-      );
-
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 20000);
       camera.position.y = getY(worldHalfWidth, worldHalfDepth) * 100 + 120;
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xbfd1e5);
+      
+      // 1. NIEBLA ATMOSFÉRICA
+      scene.fog = new THREE.FogExp2(0xbfd1e5, 0.00025);
 
       const matrix = new THREE.Matrix4();
 
       const pxGeometry = new THREE.PlaneGeometry(100, 100);
-      pxGeometry.attributes.uv.array[1] = 0.5;
-      pxGeometry.attributes.uv.array[3] = 0.5;
-      pxGeometry.rotateY(Math.PI / 2);
-      pxGeometry.translate(50, 0, 0);
+      pxGeometry.attributes.uv.array[1] = 0.5; pxGeometry.attributes.uv.array[3] = 0.5;
+      pxGeometry.rotateY(Math.PI / 2); pxGeometry.translate(50, 0, 0);
 
       const nxGeometry = new THREE.PlaneGeometry(100, 100);
-      nxGeometry.attributes.uv.array[1] = 0.5;
-      nxGeometry.attributes.uv.array[3] = 0.5;
-      nxGeometry.rotateY(-Math.PI / 2);
-      nxGeometry.translate(-50, 0, 0);
+      nxGeometry.attributes.uv.array[1] = 0.5; nxGeometry.attributes.uv.array[3] = 0.5;
+      nxGeometry.rotateY(-Math.PI / 2); nxGeometry.translate(-50, 0, 0);
 
       const pyGeometry = new THREE.PlaneGeometry(100, 100);
-      pyGeometry.attributes.uv.array[5] = 0.5;
-      pyGeometry.attributes.uv.array[7] = 0.5;
-      pyGeometry.rotateX(-Math.PI / 2);
-      pyGeometry.translate(0, 50, 0);
+      pyGeometry.attributes.uv.array[5] = 0.5; pyGeometry.attributes.uv.array[7] = 0.5;
+      pyGeometry.rotateX(-Math.PI / 2); pyGeometry.translate(0, 50, 0);
 
       const pzGeometry = new THREE.PlaneGeometry(100, 100);
-      pzGeometry.attributes.uv.array[1] = 0.5;
-      pzGeometry.attributes.uv.array[3] = 0.5;
+      pzGeometry.attributes.uv.array[1] = 0.5; pzGeometry.attributes.uv.array[3] = 0.5;
       pzGeometry.translate(0, 0, 50);
 
       const nzGeometry = new THREE.PlaneGeometry(100, 100);
-      nzGeometry.attributes.uv.array[1] = 0.5;
-      nzGeometry.attributes.uv.array[3] = 0.5;
-      nzGeometry.rotateY(Math.PI);
-      nzGeometry.translate(0, 0, -50);
+      nzGeometry.attributes.uv.array[1] = 0.5; nzGeometry.attributes.uv.array[3] = 0.5;
+      nzGeometry.rotateY(Math.PI); nzGeometry.translate(0, 0, -50);
 
       const geometries = [];
+
+      // Función auxiliar para teñir los bloques según su altura (Biomas)
+      function applyBiomeColor(geom, height) {
+        const color = new THREE.Color();
+        if (height <= 11) color.setHex(0xe8c792); // Arena
+        else if (height <= 18) color.setHex(0xa8e68e); // Pasto brillante
+        else if (height <= 24) color.setHex(0xaaaaaa); // Piedra
+        else color.setHex(0xffffff); // Nieve
+        
+        const colors = [];
+        const count = geom.attributes.position.count;
+        for (let i = 0; i < count; i++) colors.push(color.r, color.g, color.b);
+        geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        return geom;
+      }
 
       for (let z = 0; z < worldDepth; z++) {
         for (let x = 0; x < worldWidth; x++) {
@@ -149,22 +154,20 @@
           const pz = getY(x, z + 1);
           const nz = getY(x, z - 1);
 
-          geometries.push(pyGeometry.clone().applyMatrix4(matrix));
+          // Agregamos las caras y las teñimos
+          geometries.push(applyBiomeColor(pyGeometry.clone().applyMatrix4(matrix), h));
 
           if ((px !== h && px !== h + 1) || x === 0) {
-            geometries.push(pxGeometry.clone().applyMatrix4(matrix));
+            geometries.push(applyBiomeColor(pxGeometry.clone().applyMatrix4(matrix), h));
           }
-
           if ((nx !== h && nx !== h + 1) || x === worldWidth - 1) {
-            geometries.push(nxGeometry.clone().applyMatrix4(matrix));
+            geometries.push(applyBiomeColor(nxGeometry.clone().applyMatrix4(matrix), h));
           }
-
           if ((pz !== h && pz !== h + 1) || z === worldDepth - 1) {
-            geometries.push(pzGeometry.clone().applyMatrix4(matrix));
+            geometries.push(applyBiomeColor(pzGeometry.clone().applyMatrix4(matrix), h));
           }
-
           if ((nz !== h && nz !== h + 1) || z === 0) {
-            geometries.push(nzGeometry.clone().applyMatrix4(matrix));
+            geometries.push(applyBiomeColor(nzGeometry.clone().applyMatrix4(matrix), h));
           }
         }
       }
@@ -180,40 +183,71 @@
         geometry,
         new THREE.MeshLambertMaterial({
           map: texture,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide,
+          vertexColors: true // Requerido para ver los tintes de biomas
         })
       );
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
       scene.add(mesh);
 
-      const ambientLight = new THREE.AmbientLight(0xeeeeee, 3);
+      // 2. NIVEL DEL AGUA
+      const waterGeo = new THREE.PlaneGeometry(worldWidth * 100, worldDepth * 100);
+      waterGeo.rotateX(-Math.PI / 2);
+      const waterMat = new THREE.MeshLambertMaterial({ 
+        color: 0x2288ff, 
+        transparent: true, 
+        opacity: 0.65,
+        side: THREE.DoubleSide
+      });
+      const water = new THREE.Mesh(waterGeo, waterMat);
+      water.position.y = 11.2 * 100; // Nivel del agua justo arriba del nivel 11
+      water.receiveShadow = true;
+      scene.add(water);
+
+      // ILUMINACIÓN Y SOMBRAS
+      const ambientLight = new THREE.AmbientLight(0xeeeeee, 1.2);
       scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 12);
-      directionalLight.position.set(1, 1, 0.5).normalize();
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+      directionalLight.position.set(5000, 6000, 4000);
+      directionalLight.castShadow = true;
+      
+      // Ajustes de calidad de sombra para cubrir el mapa inmenso
+      const d = 6000;
+      directionalLight.shadow.camera.left = -d;
+      directionalLight.shadow.camera.right = d;
+      directionalLight.shadow.camera.top = d;
+      directionalLight.shadow.camera.bottom = -d;
+      directionalLight.shadow.camera.near = 100;
+      directionalLight.shadow.camera.far = 15000;
+      directionalLight.shadow.mapSize.width = 2048;
+      directionalLight.shadow.mapSize.height = 2048;
       scene.add(directionalLight);
 
+      // RENDERER
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true; // Activar sombras maestras
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.setAnimationLoop(animate);
       container.appendChild(renderer.domElement);
 
+      // CONTROLES
       controls = new FirstPersonControls(camera, renderer.domElement);
-      controls.movementSpeed = 400;
+      controls.movementSpeed = 600;
       controls.lookSpeed = 0.08;
       controls.lookVertical = true;
       controls.constrainVertical = true;
       controls.verticalMin = 1.1;
       controls.verticalMax = 2.2;
 
+      // 3. STATS (FPS) - Posicionado abajo a la izquierda
       stats = new Stats();
-      
-      // Reseteamos el top y lo mandamos abajo, justo arriba del footer
       stats.dom.style.top = 'auto';
-      stats.dom.style.bottom = '45px'; // 40px del footer + 5px de margen
-      stats.dom.style.left = '10px';   // Un pequeño margen a la izquierda para que se vea limpio
-      
-      container.appendChild(stats.dom);
+      stats.dom.style.bottom = '45px';
+      stats.dom.style.left = '10px';
       container.appendChild(stats.dom);
 
       window.addEventListener('resize', onWindowResize);
@@ -287,8 +321,6 @@
       renderer.render(scene, camera);
     }
   </script>
-<footer class="custom-footer">
-    &copy; 2026 Luis Enrique Cabrera García - Proyectos Three.js
-  </footer>
+
 </body>
 </html>
