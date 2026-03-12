@@ -37,7 +37,7 @@
   </div>
 
   <footer class="custom-footer">
-    &copy; 2026 Proyectos Three.js - Todos los derechos reservados
+    &copy; 2026 Luis Enrique Cabrera García - Proyectos Three.js
   </footer>
   <script type="importmap">
   {
@@ -60,21 +60,23 @@
     let targetFocus = new THREE.Vector3(0, 0, 0);
     let isFocusing = false;
     
-    // Objeto auxiliar para calcular las posiciones y animaciones
+    // Objeto y color auxiliares
     const dummy = new THREE.Object3D();
+    const colorAux = new THREE.Color();
 
     init();
 
     function init() {
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xdbe4ee);
-      scene.fog = new THREE.FogExp2(0xdbe4ee, 0.0012);
+      // Fondo más oscuro para resaltar los colores neón y la cuadrícula
+      scene.background = new THREE.Color(0x0f172a);
+      scene.fog = new THREE.FogExp2(0x0f172a, 0.0012);
 
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       
-      // HABILITAMOS LAS SOMBRAS EN EL RENDERER
+      // HABILITAMOS LAS SOMBRAS
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       
@@ -93,20 +95,31 @@
       controls.maxDistance = 800;
       controls.maxPolarAngle = Math.PI / 2;
 
-      // CREACIÓN DEL SUELO QUE RECIBE SOMBRAS
+      // SUELO QUE RECIBE SOMBRAS
       const planeGeometry = new THREE.PlaneGeometry(3000, 3000);
-      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0xc1cddb, depthWrite: false });
+      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x1e293b, depthWrite: false });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
-      plane.position.y = -40; // Colocamos el suelo un poco por debajo de los conos
+      plane.position.y = -40; // Colocamos el suelo por debajo de los conos
       plane.receiveShadow = true;
       scene.add(plane);
 
+      // MEJORA 5: CUADRÍCULA (GridHelper)
+      // Tamaño 3000, 100 divisiones, color central azul brillante, color de la red azul tenue
+      const gridHelper = new THREE.GridHelper(3000, 100, 0x3b82f6, 0x1e3a8a);
+      gridHelper.position.y = -39.9; // Ligeramente por encima del suelo para evitar parpadeos (z-fighting)
+      gridHelper.material.transparent = true;
+      gridHelper.material.opacity = 0.4; // Semitransparente
+      scene.add(gridHelper);
+
       // CREACIÓN DE LOS CONOS
       const geometry = new THREE.ConeGeometry(10, 30, 4, 1);
+      
+      // MEJORA 3 (Paso 1): Material base en blanco para que acepte bien el teñido de colores
       const material = new THREE.MeshPhongMaterial({
-        color: 0x7c86b6,
-        flatShading: true
+        color: 0xffffff,
+        flatShading: true,
+        shininess: 80 // Le da un ligero brillo plástico/metálico
       });
 
       mesh = new THREE.InstancedMesh(geometry, material, 500);
@@ -117,13 +130,17 @@
 
       for (let i = 0; i < 500; i++) {
         dummy.position.x = Math.random() * 1600 - 800;
-        dummy.position.y = Math.random() * 20; // Variación inicial en Y
+        dummy.position.y = Math.random() * 20;
         dummy.position.z = Math.random() * 1600 - 800;
-
         dummy.rotation.y = Math.random() * Math.PI;
 
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
+
+        // MEJORA 3 (Paso 2): Asignar un color aleatorio entre azul cian y morado neón
+        // HSL: Tono(Hue) de 0.5 a 0.8, Saturación 80%, Luminosidad 50-70%
+        colorAux.setHSL(Math.random() * 0.3 + 0.5, 0.8, Math.random() * 0.2 + 0.5);
+        mesh.setColorAt(i, colorAux);
       }
 
       scene.add(mesh);
@@ -131,8 +148,6 @@
       // LUCES Y SOMBRAS
       const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.5);
       dirLight1.position.set(200, 300, 200);
-      
-      // LA LUZ PRINCIPAL PROYECTA SOMBRA
       dirLight1.castShadow = true;
       dirLight1.shadow.camera.top = 800;
       dirLight1.shadow.camera.bottom = -800;
@@ -144,14 +159,15 @@
       dirLight1.shadow.mapSize.height = 2048;
       scene.add(dirLight1);
 
-      const dirLight2 = new THREE.DirectionalLight(0x4455aa, 1.5);
+      // Luz secundaria con tono magenta/morado para acentuar la vibra retro-futurista
+      const dirLight2 = new THREE.DirectionalLight(0xa855f7, 1.5);
       dirLight2.position.set(-100, 100, -100);
       scene.add(dirLight2);
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
       scene.add(ambientLight);
 
-      // PREPARACIÓN DEL RAYCASTER PARA EL DOBLE CLIC
+      // PREPARACIÓN DEL RAYCASTER
       raycaster = new THREE.Raycaster();
       mouse = new THREE.Vector2();
 
@@ -159,7 +175,7 @@
       window.addEventListener('dblclick', onDoubleClick);
     }
 
-    // FUNCIÓN DE ENFOQUE DINÁMICO AL HACER DOBLE CLIC
+    // FUNCIÓN DE ENFOQUE DINÁMICO
     function onDoubleClick(event) {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -170,14 +186,10 @@
       if (intersects.length > 0) {
         const instanceId = intersects[0].instanceId;
         
-        // Extraemos la matriz de esa instancia específica
         const matrix = new THREE.Matrix4();
         mesh.getMatrixAt(instanceId, matrix);
         
-        // Obtenemos su posición exacta en el mundo
         targetFocus.setFromMatrixPosition(matrix);
-        
-        // Activamos la bandera para que el ciclo animate() inicie la transición
         isFocusing = true;
       }
     }
@@ -189,34 +201,22 @@
     }
 
     function animate() {
-      // ANIMACIÓN DE LAS INSTANCIAS (Rotación y Flotación)
       const time = performance.now() * 0.001;
       
       for (let i = 0; i < 500; i++) {
         mesh.getMatrixAt(i, dummy.matrix);
-        
-        // Descomponemos la matriz actual para leer su posición y rotación
         dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
         
-        // Hacemos que gire sobre sí mismo continuamente
         dummy.rotation.y += 0.01;
-        
-        // Hacemos que flote arriba y abajo usando una onda senoidal. 
-        // Usamos el índice 'i' para que cada uno flote a destiempo.
         dummy.position.y = Math.sin(time * 2 + i) * 15;
         
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
       }
-      // Le indicamos a Three.js que las matrices han cambiado y debe renderizarlas
       mesh.instanceMatrix.needsUpdate = true;
 
-      // TRANSICIÓN SUAVE DEL ENFOQUE (Lerp)
       if (isFocusing) {
-        // Movemos el centro de rotación (target) hacia el cono seleccionado
         controls.target.lerp(targetFocus, 0.05);
-        
-        // Si ya está muy cerca del objetivo, detenemos la transición
         if (controls.target.distanceTo(targetFocus) < 0.5) {
           isFocusing = false;
         }
